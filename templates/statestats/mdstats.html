@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            max-width: 902px;
+            margin: 20px;
+            max-height: 350px;
+        }
+        .chart-container {
+            display: flex;
+            flex-wrap: wrap; /* Ensures charts wrap on smaller screens */
+            justify-content: center; /* Centers the charts */
+            gap: 20px; /* Adds space between charts */
+        }
+        h1 {
+            text-align: center;
+        }
+    </style>
+    <title>Document</title>
+</head>
+<body>
+    <h1>Crime Statistics Graph for {{ .state }} </h1>
+    <div class="chart-container">
+        <canvas id="crimeChart"></canvas>
+        <canvas id="sexChart"></canvas>
+        <canvas id="maleAgeChart"></canvas>
+        <canvas id="femaleAgeChart"></canvas>
+        <canvas id="raceChart"></canvas>
+    </div>
+
+    <script>
+        // Sample JSON response (replace this with your actual API response)
+        const jsonResponse = {
+            "Arrestee Sex": {
+                "Male": 72109,
+                "Female": 24931
+            },
+            "Offense Name": {
+                "Rape": 0,
+                "Arson": 109,
+                "Fraud": 478,
+                "Larceny": 8026,
+                "Robbery": 2343,
+                "Weapons": 2975,
+                "Burglary": 1903,
+                "Vandalism": 1579,
+                "Sex Offenses": 279,
+                "Rape (Legacy)": 386,
+                "Simple Assault": 11963,
+                "Drug Possession": 5580,
+                "Stolen Property": 669,
+                "Human Trafficking": 22,
+                "Aggravated Assault": 6082,
+                "All Other Offenses": 35999,
+                "Disorderly Conduct": 1776,
+                "Motor Vehicle Theft": 1972,
+                "Drug Abuse Violations": 606,
+                "Counterfeiting/Forgery": 117,
+                "Drug Sale/Manufacturing": 1940,
+                "Drive Under the Influence": 11202,
+                "Offenses Against the Family and Children": 1070
+            },
+            "Arrestee Race": {
+                "Asian": 1100,
+                "White": 43808,
+                "Unknown": 1545,
+                "Black or African American": 50390,
+                "American Indian or Alaska Native": 100,
+            },
+            "Male Arrests By Age": {
+                "15": 1664,
+                "16": 1705,
+                "17": 1640,
+                "18": 1630,
+                "19": 1673,
+                "20": 1741,
+                "21": 1759,
+                "22": 1901,
+                "23": 1952,
+                "24": 2013,
+                "10-12": 173,
+                "11-12": 0,
+                "13-14": 2157,
+                "25-29": 10536,
+                "30-34": 11338,
+                "35-39": 9082,
+                "40-44": 6805,
+                "45-49": 4371,
+                "50-54": 3476,
+                "55-59": 2898,
+                "60-64": 1977,
+                "65 and over": 1596,
+            },
+            "Female Arrests By Age": {
+                "15": 792,
+                "16": 572,
+                "17": 485,
+                "18": 444,
+                "19": 461,
+                "20": 483,
+                "21": 654,
+                "22": 647,
+                "23": 728,
+                "24": 672,
+                "10-12": 95,
+                "11-12": 0,
+                "13-14": 1158,
+                "25-29": 3933,
+                "30-34": 4147,
+                "35-39": 3289,
+                "40-44": 2303,
+                "45-49": 1337,
+                "50-54": 1041,
+                "55-59": 788,
+                "60-64": 526,
+                "65 and over": 373,
+            }
+        };
+
+        // extract data for the graph
+        const offenseNames = Object.keys(jsonResponse["Offense Name"]);
+        const offenseCounts = Object.values(jsonResponse["Offense Name"]);
+        const sexLabels = Object.keys(jsonResponse["Arrestee Sex"]);
+        const sexCounts = Object.values(jsonResponse["Arrestee Sex"]);
+        const raceLabels = Object.keys(jsonResponse["Arrestee Race"]);
+        const raceCounts = Object.values(jsonResponse["Arrestee Race"]);
+        const maleAgeLabels = Object.keys(jsonResponse["Male Arrests By Age"]);
+        const maleAgeCounts = Object.values(jsonResponse["Male Arrests By Age"]);
+        const femaleAgeLabels = Object.keys(jsonResponse["Female Arrests By Age"]);
+        const femaleAgeCounts = Object.values(jsonResponse["Female Arrests By Age"]);
+
+        // create the graph
+        const ctx = document.getElementById('crimeChart').getContext('2d');
+        const crimeChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: offenseNames,
+                datasets: [{
+                    label: 'Number of Arrests',
+                    data: offenseCounts,
+                    backgroundColor: 'rgba(75, 192, 192, 1)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'                        
+                    },
+                    title: {
+                        display: true,
+                        text: 'Crime Statistics by Offense Type'
+                    }
+                }
+            }
+        });
+
+        // Create sex chart
+        new Chart(document.getElementById('sexChart'), {
+            type: 'bar',
+            data: {
+                labels: sexLabels,
+                datasets: [{
+                    label: 'Number of Arrests by Sex',
+                    data: sexCounts,
+                    backgroundColor: ['rgba(54, 162, 235, 1)', 'rgba(255, 99, 132, 1)'],
+                    borderColor: ['rgba(54, 162, 235, 1)', 'rgba(255, 99, 132, 1)'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'                        
+                    },
+                    title: {
+                        display: true,
+                        text: 'Crime Statistics by Offense Type'
+                    }
+                }
+            }
+        });
+
+        new Chart(document.getElementById('maleAgeChart'), {
+            type: 'bar',
+            data: {
+                labels: maleAgeLabels,
+                datasets: [{
+                    label: 'Number of Arrests by Age for Men',
+                    data: maleAgeCounts,
+                    backgroundColor: ['rgba(54, 162, 235, 1)'],
+                    borderColor: ['rgba(54, 162, 235, 1)'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'                        
+                    },
+                    title: {
+                        display: true,
+                        text: 'Crime Statistics by Offense Type'
+                    }
+                }
+            }
+        });
+
+        new Chart(document.getElementById('femaleAgeChart'), {
+            type: 'bar',
+            data: {
+                labels: femaleAgeLabels,
+                datasets: [{
+                    label: 'Number of Arrests by Age for Women',
+                    data: femaleAgeCounts,
+                    backgroundColor: ['rgba(255, 99, 132, 1)'],
+                    borderColor: ['rgba(255, 99, 132, 1)'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'                        
+                    },
+                    title: {
+                        display: true,
+                        text: 'Crime Statistics by Offense Type'
+                    }
+                }
+            }
+        });
+
+        // Create race chart
+        new Chart(document.getElementById('raceChart'), {
+            type: 'bar',
+            data: {
+                labels: raceLabels,
+                datasets: [{
+                    label: 'Number of Arrests by Race',
+                    data: raceCounts,
+                    backgroundColor: [
+                        'yellow',
+                        '#F8EDEDFF',
+                        'green',
+                        'black',
+                        'orange'
+                    ],
+                    borderColor: [
+                        'yellow',
+                        '#F8EDEDFF',
+                        'green',
+                        'black',
+                        'orange'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'                        
+                    },
+                    title: {
+                        display: true,
+                        text: 'Crime Statistics by Offense Type'
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
